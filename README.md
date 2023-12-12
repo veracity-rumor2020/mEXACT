@@ -19,33 +19,21 @@ conda env create -f mexact.yml
 ## Details
 
 ### Details of getData.py
- * This python script first prepare the data for news text, user comments and news images. Next, it invokes build_NeuralNet() function of another script getModel.py to compile our neural network model.
- * Execute "getData.py" file to initite the program.
+ * This python script first prepare the data for news text, user comments and news images.
+ * Next, it invokes build_NeuralNet() function of another script getModel.py to compile our neural network model.
+ * Execute "getData.py" file to initite the training process.
+ * After model training is done, save the trained model.
  * Required files will be saved under "repo_Fast" folder.
    
 ### Details of getModel.py
  * This file contains the main DNN model mEXACT.
  * mEXACT first extracts encodede representation of news text, user comments and news image.
- * Next, mEXACT invokes artificialThresholding() function to retain the LS features in the encodede representation o fnews text, user comments and news image.
- * 
+ * Next, mEXACT invokes artificialThresholding() function to retain the LS features in the encodede representation of news text, user comments and news image.
+   
 ### Details of getData_Explainability.py
- * This folder contains the variant "__gDART∼Unsupervised Loss__" which does not consider the unsupervised loss.
- * Follow the similar steps of gDART model to execute this variant
-
-### Details of gDART∼Encoder+Dense folder
- * This folder contains the variant "__gDART∼Encoder+Dense__" which substitutes all the Encoders with Dense layers.
- * Follow the similar steps of gDART model to execute this variant
-
-
-### Details of lDART folder
- * This folder contains the variant "__lDART__".
- * lDART uses a stack of Encoders while leveraging the unique contextual correlations inside the final Encoder.
- * Follow the similar steps of gDART model to execute this variant
-
-### Details of gDART(BERT-fine tune) folder
- * This folder contains the implementaion of gDART with the __pre-trained Fine-tuing BERT model__ which is evaluated on COVID-19 fake news dataset.
- * We use BERT BASE version which has 12 encoders, 12 attention heads.
-
+ * This python script also prepares the data for news text, user comments and news images.
+ * Next, it loads the already saved trained mEXACR model.
+ * Finally, this script stores the explainable and non-explainable components of news text, user comments and news image by analyzing the MS and LS information. 
 
 
 
