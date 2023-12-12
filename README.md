@@ -18,11 +18,11 @@ conda env create -f mexact.yml
 
 ## Details
 
-### Details of gDART folder
- * The main model is kept inside the folder "__gDART__". Neural network model is written in "rumour_Transformer.py" which in turn invoke MHA.py where the actual MHA code is residing.
- * Execute "trainTestModel_Fast.py" file inside this folder to initite the program.
- * Results and required files will be saved under "repo_Fast" folder.
- * Then Execute "resCal.py" file to get the Accuracy and Macro F score.
+### Details of getData.py
+ * This python script first prepare the data for news text, user comments and news images. Next, it invokes build_NeuralNet() function of another script getModel.py to compile our neural network model.
+ * Execute "getData.py" file to initite the program.
+ * Required files will be saved under "repo_Fast" folder.
+ * 
 
 ### Details of gDART∼Src folder
  * This folder contains the variant "__gDART∼Src__" which does not contain source as an input.
