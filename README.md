@@ -12,8 +12,9 @@ Anaconda 3
 
 ### Create Environment
 Type the following command to create the environment "mexact" which contains all the required packages. <br />
+~~~~
 conda env create -f mexact.yml
-
+~~~~
 -----------------------
 
 ## Details
