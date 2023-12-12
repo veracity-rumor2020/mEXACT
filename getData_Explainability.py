@@ -1,5 +1,3 @@
-
-
 import pandas as pd
 import json
 import re	
@@ -75,46 +73,99 @@ callback = tf.keras.callbacks.EarlyStopping(monitor='loss', patience=patience)
 
 if __name__ == "__main__":
 	
-	#=====Load All the stored data ==================
-	encoder_decoder = tf.keras.models.load_model("../ReCoVery_reconstruct/model_image_recon_Aug_90")
+	df = pd.read_csv("dataset.csv", delimiter = ",") #Read ReCOVery or MMCoVaR dataset	
+	
+	df['usersId'] =  df['usersId'].apply(lambda x:le(x))
+	df['usersText'] =  df['usersText'].apply(lambda x:le(x))
+	df_news = df[['news_id', 'image', 'body_text', 'reliability']]
+	#reliability label of the news article (1 = reliable/true, 0 = unreliable/fake)
+	df_news['reliability_inverse'] = df_news['reliability'].apply(lambda x:(1-x) if x!=1 else 1)
+	df_comments = df[['news_id','usersId', 'usersText']]
+	df_comments["usersText_clean"] = df_comments["usersText"].apply(lambda x:[performCleaning(ele) for ele in x]) 
+
+	#<----Dealing with Images--->
+	idL = df["news_id"].tolist()
+	idL = [str(id_) for id_ in idL]	
+	absentL = []
+	for id_ in idL:
+		if id_ not in list(di_image_id_name_all.keys()):
+			absentL.append(id_)
+	
+	
+	training_data = []
+	for i, id_ in enumerate(idL):
+		if id_ in list(di_image_id_name_all.keys()):
+			file_loc = os.path.join(image_base_path_all,di_image_id_name_all[id_])
+			if os.path.exists(file_loc):
+				img_array = cv2.imread(file_loc)#, cv2.IMREAD_GRAYSCALE)
+				if img_array is None:
+					print(i,": ",id_)
+					print(file_loc)					
+					new_array = np.random.rand(224,224,3)			
+	
+
+				else:		
+					new_array = cv2.resize(img_array, (IMG_HEIGHT, IMG_WIDTH))#;print("shape of img_array: ",new_array.shape);input("............................")
+				
+				training_data.append(new_array)				
+				
+		else:
+			training_data.append(np.random.rand(224,224,3))
+
+	
+	print("Testing data size: ",len(training_data))#(1712, 224, 224, 3)	
+	test_x=np.array(training_data)
+	test_x=test_x/255.0
+	print(test_x.shape)
+	encoder_decoder = tf.keras.models.load_model("model_image_recon") # Load Pretrained Autoencoder model for image reconstruction
 	model_encoder = tf.keras.Model(inputs = encoder_decoder.inputs, outputs = encoder_decoder.get_layer('reshape_encoder').output)
-	model_decoder = tf.keras.Model(inputs = encoder_decoder.get_layer('reshape_encoder').output, outputs = encoder_decoder.get_layer('decoder_out').output)	
-
-	encoded_train_x = np.load('input/encoded_train_x.npy')
-	encoded_train_c = np.load('input/encoded_train_c.npy')
-	image_x = np.load('input/image_x.npy')	
-
-	encoded_val_x = np.load('input/encoded_val_x.npy')
-	encoded_val_c = np.load('input/encoded_val_c.npy')
-	image_val = np.load('input/image_val.npy')
+	model_decoder = tf.keras.Model(inputs = encoder_decoder.get_layer('reshape_encoder').output, outputs = encoder_decoder.get_layer('decoder_out').output)
 	
-	val_y = np.load('input/val_y.npy')
-	val_inverse_y = np.load('input/val_inverse_y.npy')
-
-
-	train_y = np.load('input/train_y.npy')
-	train_inverse_y = np.load('input/train_inverse_y.npy')
-
-	embedding_matrix = np.load('input/embedding_matrix.npy')
-
-	with open('input/word_index.pickle', 'rb') as f:
-		word_index = pickle.load(f)
-
-	with open('input/val_x.pickle', 'rb') as f:
-		val_x = pickle.load(f)
+	print(model_encoder.summary())	
+	print(model_decoder.summary())
 	
-	with open('input/val_c.pickle', 'rb') as f:
-		val_c = pickle.load(f)
+	test_xZ = model_encoder.predict(test_x)
+	
+	print(f"toal Z.shape : {test_xZ.shape}") # Get total Z from trained autoencoder	(N, 28, 28, 100) where N is #training samples
+
+	#<=== create News data and their labels ====>
+	VALIDATION_SPLIT = 0.25	
+	contents = []
+	labels = []
+	ids = []
+	
+	for i, row in df_news.iterrows():
+		text = row["body_text"]	
+		text = clean_str(text)
+		sentences = normalize(text)
+		contents.append(sentences)
+		ids.append(row['news_id'])
+		labels.append(row['reliability'])
+		
 
 
-	with open('input/id_train.pickle', 'rb') as f:
-		id_train = pickle.load(f)
+	labels_inverse = df_news['reliability_inverse'].tolist()
+	labels = np.asarray(labels);print(labels)
+	labels_inverse = np.asarray(labels_inverse);print(labels_inverse)
+		
+	#<=== load user comments or tweets ===>
+	comments_text = df_comments["usersText_clean"].tolist()
+	
+	#<===Training and testing split===>
 
-	with open('input/id_test.pickle', 'rb') as f:
-		id_test = pickle.load(f)
+	id_train, id_test, train_x, val_x, train_y, val_y, train_c, val_c, image_x, image_val,train_inverse_y, val_inverse_y = train_test_split(ids,contents, labels, comments_text,test_xZ,labels_inverse, test_size=VALIDATION_SPLIT, random_state=42,stratify=labels)
+	
 
+	print("===Start Work on Embedding===")
+	VOCABULARY_SIZE, t, reverse_word_index = fit_on_news_and_comments(train_x, train_c, val_x, val_c)
+	#choose embedding dimension from {glove.6B.50d.txt,glove.6B.100d.txt,glove.6B.200d.txt,glove.6B.300d.txt}
+	embedding_matrix, word_index = build_Embedding_Matrix("embedding/glove.6B/glove.6B.100d.txt", t, aff_dim=80) #here we choose 100, for example. 
 
-	print("done...data storing...")
+		
+	encoded_train_x = _encode_texts(train_x,t)
+	encoded_val_x = _encode_texts(val_x,t)
+	encoded_train_c = _encode_comments(train_c,t)
+	encoded_val_c = _encode_comments(val_c,t)
 
 		
 	model = tf.keras.models.load_model("Model") #----Load Pretrained mEXACT Model-----
