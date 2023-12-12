@@ -22,13 +22,13 @@ conda env create -f mexact.yml
  * This python script first prepare the data for news text, user comments and news images. Next, it invokes build_NeuralNet() function of another script getModel.py to compile our neural network model.
  * Execute "getData.py" file to initite the program.
  * Required files will be saved under "repo_Fast" folder.
+   
+### Details of getModel.py
+ * This file contains the main DNN model mEXACT.
+ * mEXACT first extracts encodede representation of news text, user comments and news image.
+ * Next, mEXACT invokes artificialThresholding() function to retain the LS features in the encodede representation o fnews text, user comments and news image.
  * 
-
-### Details of gDART∼Src folder
- * This folder contains the variant "__gDART∼Src__" which does not contain source as an input.
- * Follow the similar steps of gDART model to execute this variant
-
-### Details of gDART∼Unsupervised Loss folder
+### Details of getData_Explainability.py
  * This folder contains the variant "__gDART∼Unsupervised Loss__" which does not consider the unsupervised loss.
  * Follow the similar steps of gDART model to execute this variant
 
