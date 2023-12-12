@@ -56,9 +56,9 @@ IMG_WIDTH = 224
 
 
 
-threshold_news = 0.02666666666 # (1/37.5)
-threshold_com = 0.0133#(1/75)
-threshold_image = 0.00125944584  #1/794
+threshold_news = #0.02666666(=1/37.5) for ReCOVery and 0.016(=1/62.5) for MMCoVaR 
+threshold_com = #0.0133(=1/75) for both the Datasets
+threshold_image = #0.00125944584(=1/794) for both the Datasets
 
 lr = # choose learning rate from {0.001, 0.0001, 0.00001}
 pout = "repo_Fast/"
