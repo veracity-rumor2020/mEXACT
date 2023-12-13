@@ -263,7 +263,8 @@ if __name__ == "__main__":
 	test_x=np.array(training_data)
 	test_x=test_x/255.0
 	print(test_x.shape)
-	encoder_decoder = tf.keras.models.load_model("model_image_recon") # Load Pretrained Autoencoder model for image reconstruction
+	#======Load Pretrained Autoencoder model for image reconstruction===========
+	encoder_decoder = tf.keras.models.load_model("model_image_recon_Aug_90") #Go under "Autoencoder_ReCOVery" director and unzip "model_image_recon_Aug_90.zip" file for loading autoencoder trained on ReCOVery dataset. For MMCoVaR check "Autoencoder_MMCoVaR" directory. 
 	model_encoder = tf.keras.Model(inputs = encoder_decoder.inputs, outputs = encoder_decoder.get_layer('reshape_encoder').output)
 	model_decoder = tf.keras.Model(inputs = encoder_decoder.get_layer('reshape_encoder').output, outputs = encoder_decoder.get_layer('decoder_out').output)
 	
