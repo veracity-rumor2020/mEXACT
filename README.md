@@ -1,4 +1,4 @@
-# mEXACT: Exploring a New Facet of Explainability for Multimodal Misinformation Detection 
+# Tired of Black-Box Misinformation Detectors? Exploring a New Facet of Explainability for Multimodal Misinformation Detection 
 ## Introduction
 mEXACT finds a variable-size bucket of check-worthy information whose removal from a false input sample can invert its semantics. Consequently, the proposed model is capable of distinguishing contributing and non-contributing misinformation elements for better explainability along with outperforming the existing models over classification performance.
 
